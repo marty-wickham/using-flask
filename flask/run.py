@@ -1,9 +1,10 @@
 import os
 import json
-from flask import Flask, render_template    # The capital F indicates that that's a class name. Firstly we import our Flask class.
+from flask import Flask, render_template, request, flash    # The capital F indicates that that's a class name. Firstly we import our Flask class.
 
 app = Flask(__name__)       # We then creat an instance of this and stor is our variable is called app. (Convention).
-                            
+app.secret_key = 'some_secret'
+
 @app.route('/')             # The root decorator binds the index() function to itself so that whenever that root is called, the function is called.
 def index():                # This function is also called a view
     return render_template("index.html")
@@ -13,7 +14,7 @@ def about_member(member_name):
     member = {}
 
     with open('data/company.json', 'r') as json_data:
-        data = json.load(json_data)
+        data = json.load(json_data)                           # Create another variable inside where we pass the data that we've passed through and converted into JSON. 
         for obj in data:
             if obj["url"] == member_name:
                 member = obj
@@ -27,9 +28,11 @@ def about():
     with open('data/company.json', 'r') as json_data:
         data = json.load(json_data)
     return render_template("about.html", page_title="About", company=data)        # The additional argument here 'page_title' is a variable name chosen.
-                                                                    # You can add as many additional arguments as you like
-@app.route('/contact')
+                                                                                  # You can add as many additional arguments as you like
+@app.route('/contact', methods=["GET", "POST"])
 def contact():
+    if request.method == "POST":
+        flash("Thanks {}, we have received your message!".format(request.form["name"]))
     return render_template("contact.html", page_title="Contact")
 
 @app.route('/careers')
